@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAS 101 | Curiosity Journal 12</title>
+  <style>
+    :root {
+      --ink:#111111;
+      --muted:#7d7d7d;
+      --line:#dedede;
+      --soft:#f4f4f4;
+      --paper:#ffffff;
+      --page:820px;
+      --radius:12px;
+      --gold:#f5c94f;
+      --silver:#cfd7de;
+      --bronze:#e8a464;
+    }
+
+    * { box-sizing:border-box; }
+
+    html,body {
+      margin:0;
+      min-height:100%;
+      background:#fff;
+      color:var(--ink);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    body { padding:72px 24px 96px; }
+    button,a { -webkit-tap-highlight-color:transparent; }
+    button { font:inherit; }
+    a { color:inherit; }
+
+    :focus-visible {
+      outline:2px solid #111;
+      outline-offset:3px;
+    }
+
+    .assignment-page {
+      width:min(100%,var(--page));
+      margin:0 auto;
+    }
+
+    .assignment-header {
+      padding:0 48px 46px;
+      text-align:center;
+    }
+
+    .assignment-title {
+      margin:0;
+      font-size:clamp(38px,6vw,58px);
+      line-height:1.02;
+      letter-spacing:-.05em;
+      font-weight:800;
+    }
+
+    .section {
+      margin-top:54px;
+    }
+
+    .section-title {
+      margin:0 0 20px;
+      font-size:24px;
+      line-height:1.15;
+      letter-spacing:-.035em;
+      font-weight:800;
+    }
+
+    .body-copy {
+      color:#353535;
+      font-size:16px;
+      line-height:1.62;
+    }
+
+    .body-copy p {
+      margin:0 0 22px;
+    }
+
+    .card {
+      border:1px solid #cfcfcf;
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:var(--paper);
+    }
+
+    .journal-card {
+      min-height:270px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .journal-main {
+      position:relative;
+      min-height:270px;
+      display:grid;
+      place-items:center;
+      padding:48px 220px;
+      overflow:hidden;
+      flex:1 1 auto;
+    }
+
+    .journal-copy {
+      position:relative;
+      z-index:3;
+      text-align:center;
+    }
+
+    .journal-copy h2 {
+      margin:0;
+      font-size:32px;
+      line-height:1.08;
+      letter-spacing:-.035em;
+      font-weight:800;
+    }
+
+    .journal-subtitle {
+      margin:7px 0 0;
+      color:#555;
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .actions {
+      display:flex;
+      justify-content:center;
+      margin-top:22px;
+    }
+
+    .pill {
+      min-width:116px;
+      height:36px;
+      padding:0 17px;
+      border:1.5px solid #111;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      font-size:12px;
+      font-weight:750;
+      transition:transform .18s ease;
+    }
+
+    .pill:hover { transform:translateY(-1px); }
+    .pill.primary { background:#111;color:#fff; }
+
+    .card-footer {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:14px 18px;
+      border-top:1px solid #e1e1e1;
+      background:#f4f4f4;
+      color:#666;
+      font-size:13px;
+      font-weight:700;
+      text-align:center;
+    }
+
+    .card-footer-icon {
+      display:inline-block;
+      width:16px;
+      height:16px;
+      flex:0 0 16px;
+      background-color:currentColor;
+      -webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-days.svg');
+      mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-days.svg');
+      -webkit-mask-repeat:no-repeat;
+      mask-repeat:no-repeat;
+      -webkit-mask-position:center;
+      mask-position:center;
+      -webkit-mask-size:contain;
+      mask-size:contain;
+    }
+
+    .journal-book {
+      position:absolute;
+      border:1px solid rgba(0,0,0,.16);
+      border-radius:2px 5px 5px 2px;
+      box-shadow:8px 11px 18px rgba(0,0,0,.14);
+      overflow:hidden;
+      background:#ddd;
+    }
+
+    .journal-book::before {
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:6px;
+      z-index:2;
+      background:linear-gradient(90deg,#111 0 2px,rgba(0,0,0,.25) 2px 4px,rgba(255,255,255,.35) 4px 5px,transparent 5px);
+    }
+
+    .book-a { left:94px; top:-42px; width:78px; height:116px; transform:rotate(14deg); }
+    .book-b { left:42px; top:86px; width:92px; height:138px; transform:rotate(-14deg); }
+    .book-c { left:84px; bottom:-54px; width:86px; height:129px; transform:rotate(13deg); }
+    .book-d { right:94px; top:-38px; width:82px; height:123px; transform:rotate(-13deg); }
+    .book-e { right:44px; top:88px; width:92px; height:138px; transform:rotate(13deg); }
+    .book-f { right:84px; bottom:-52px; width:88px; height:132px; transform:rotate(-11deg); }
+
+    .pattern-2 {
+      background-color:#111;
+      background-image:linear-gradient(45deg,#444 25%,transparent 25%),linear-gradient(-45deg,#444 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#444 75%),linear-gradient(-45deg,transparent 75%,#444 75%);
+      background-size:28px 28px;
+      background-position:0 0,0 14px,14px -14px,-14px 0;
+    }
+    .pattern-9 {
+      background:radial-gradient(ellipse at center,#fff 0 28%,transparent 29%) 0 0/24px 16px,radial-gradient(ellipse at center,#111 0 28%,transparent 29%) 12px 8px/24px 16px,#ddd;
+    }
+    .pattern-10 {
+      background-color:#f16d42;
+      background-image:radial-gradient(circle at 25% 25%,#f7d148 0 12%,transparent 13%),radial-gradient(circle at 75% 75%,#167f87 0 12%,transparent 13%);
+      background-size:28px 28px;
+    }
+    .pattern-15 {
+      background:radial-gradient(circle at 0 0,#fff 0 18%,transparent 19%) 0 0/30px 30px,radial-gradient(circle at 100% 100%,#fff 0 18%,transparent 19%) 0 0/30px 30px,#1d1d1d;
+    }
+    .pattern-17 {
+      background:conic-gradient(from 0deg at 50% 25%,#d95438 0 120deg,#f0c94c 0 240deg,#2d7f88 0) 0 0/36px 36px;
+    }
+    .pattern-21 {
+      background:radial-gradient(circle,#111 0 2px,transparent 3px) 0 0/12px 12px,#f2be48;
+    }
+
+    .demo-carousel {
+      margin-top:22px;
+    }
+
+    .demo-viewport {
+      position:relative;
+    }
+
+    .demo-slide {
+      display:none;
+      animation:slideIn .28s ease;
+    }
+
+    .demo-slide.is-active { display:block; }
+
+    @keyframes slideIn {
+      from { opacity:0; transform:translateX(12px); }
+      to { opacity:1; transform:translateX(0); }
+    }
+
+    .demo-video-frame {
+      overflow:hidden;
+      border:1px solid #cfcfcf;
+      border-radius:var(--radius);
+      background:#f7f7f7;
+    }
+
+    .demo-video-frame video {
+      display:block;
+      width:100%;
+      aspect-ratio:16/9;
+      object-fit:cover;
+      background:#f4f4f4;
+    }
+
+    .demo-caption {
+      margin:20px 6px 0;
+      color:#222;
+      font-size:17px;
+      line-height:1.5;
+      font-weight:400;
+    }
+
+    .demo-caption strong{
+      font-weight:800;
+    }
+
+    .video-fallback{
+      min-height:360px;
+      padding:34px;
+      display:none;
+      place-items:center;
+      text-align:center;
+      color:#666;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .video-fallback a{
+      color:#111;
+      font-weight:750;
+    }
+
+    .carousel-controls {
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:28px;
+    }
+
+    .carousel-arrow {
+      width:44px;
+      height:44px;
+      padding:0;
+      border:0;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:rgba(0,0,0,.05);
+      color:#555;
+      cursor:pointer;
+      transition:background .18s ease,transform .18s ease;
+    }
+
+    .carousel-arrow:hover:not(:disabled) {
+      background:rgba(0,0,0,.09);
+      transform:translateY(-1px);
+    }
+
+    .carousel-arrow:disabled {
+      opacity:.32;
+      cursor:default;
+    }
+
+    .carousel-arrow::before {
+      content:"";
+      width:22px;
+      height:22px;
+      background-color:currentColor;
+      -webkit-mask-repeat:no-repeat;
+      mask-repeat:no-repeat;
+      -webkit-mask-position:center;
+      mask-position:center;
+      -webkit-mask-size:contain;
+      mask-size:contain;
+    }
+
+    .carousel-arrow.prev::before {
+      -webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/chevron-left.svg');
+      mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/chevron-left.svg');
+    }
+
+    .carousel-arrow.next::before {
+      -webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/chevron-right.svg');
+      mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/chevron-right.svg');
+    }
+
+    .rubric-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:22px;
+      align-items:start;
+    }
+
+    .rubric-column {
+      min-width:0;
+      padding:26px 22px 24px;
+      border:1px solid #d8d8d8;
+      border-radius:var(--radius);
+      background:#fff;
+      text-align:center;
+      transition:
+        transform .22s ease,
+        border-color .22s ease,
+        background-color .32s ease;
+    }
+
+    .rubric-column:hover{
+      border-color:#cfcfcf;
+    }
+
+    .rubric-column.gold{--rubric-color:#f5c94f}
+    .rubric-column.silver{--rubric-color:#cfd7de}
+    .rubric-column.bronze{--rubric-color:#e7a064}
+
+    .medal {
+      position:relative;
+      width:92px;
+      height:92px;
+      margin:0 auto 14px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      border-radius:50%;
+    }
+
+    .medal::after{
+      content:"";
+      position:absolute;
+      top:-20%;
+      bottom:-20%;
+      left:-65%;
+      width:38%;
+      transform:skewX(-20deg);
+      background:linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,.16) 25%,
+        rgba(255,255,255,.9) 50%,
+        rgba(255,255,255,.16) 75%,
+        transparent 100%
+      );
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .rubric-column:hover .medal::after{
+      opacity:1;
+      animation:medalShimmer 2.1s ease-in-out infinite;
+    }
+
+    @keyframes medalShimmer{
+      0%{left:-65%}
+      55%{left:125%}
+      100%{left:125%}
+    }
+
+    .medal svg {
+      width:100%;
+      height:100%;
+      overflow:visible;
+    }
+
+    .criterion-points{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:25px;
+      margin-top:10px;
+      padding:0 10px;
+      border-radius:999px;
+      color:#111;
+      font-size:11px;
+      line-height:1;
+      font-weight:800;
+    }
+
+    .rubric-column.gold .criterion-points{
+      background:#f5c94f;
+    }
+
+    .rubric-column.silver .criterion-points{
+      background:#cfd7de;
+    }
+
+    .rubric-column.bronze .criterion-points{
+      background:#e7a064;
+    }
+
+    .criterion-points{
+      position:relative;
+      overflow:hidden;
+    }
+
+    .criterion-points::after{
+      content:"";
+      position:absolute;
+      top:-35%;
+      bottom:-35%;
+      left:-70%;
+      width:38%;
+      transform:skewX(-20deg);
+      background:linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,.18) 25%,
+        rgba(255,255,255,.92) 50%,
+        rgba(255,255,255,.18) 75%,
+        transparent 100%
+      );
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .rubric-column:hover .criterion-points::after{
+      opacity:1;
+      animation:pointPillShimmer 2.1s ease-in-out infinite;
+    }
+
+    @keyframes pointPillShimmer{
+      0%{left:-70%}
+      55%{left:135%}
+      100%{left:135%}
+    }
+
+    .rubric-column h3 {
+      margin:0;
+      font-size:20px;
+      font-weight:800;
+    }
+
+    .rubric-score {
+      margin:5px 0 20px;
+      color:#888;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .rubric-list {
+      margin:0;
+      padding:0;
+      list-style:none;
+      text-align:left;
+    }
+
+    .rubric-list li {
+      padding:14px 0;
+      border-top:1px solid #ececec;
+      color:#3f3f3f;
+      font-size:13px;
+      line-height:1.48;
+    }
+
+    .rubric-list strong { color:#111; }
+
+    .page-divider {
+      height:1px;
+      margin:56px 0 0;
+      background:#d7d7d7;
+    }
+
+    @media(max-width:760px) {
+      body { padding:42px 14px 64px; }
+      .assignment-header { padding:0 8px 36px; }
+      .assignment-title { font-size:clamp(38px,12vw,52px); }
+      .journal-main { min-height:320px; padding:62px 34px; }
+      .book-a { left:28px; top:-28px; width:54px; height:81px; }
+      .book-b { left:8px; top:96px; width:64px; height:96px; }
+      .book-c { left:28px; bottom:-34px; width:58px; height:87px; }
+      .book-d { right:28px; top:-26px; width:56px; height:84px; }
+      .book-e { right:8px; top:98px; width:64px; height:96px; }
+      .book-f { right:28px; bottom:-34px; width:60px; height:90px; }
+      .rubric-grid { grid-template-columns:1fr; }
+      .section { margin-top:44px; }
+      .demo-caption { font-size:15px; }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      *,*::before,*::after {
+        animation:none!important;
+        transition:none!important;
+        scroll-behavior:auto!important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="assignment-page">
+    <header class="assignment-header">
+      <h1 class="assignment-title">Curiosity Journal 12</h1>
+    </header>
+
+    <section class="card journal-card" aria-label="Curiosity Journal">
+      <div class="journal-main">
+        <div class="journal-book book-a pattern-9"></div>
+        <div class="journal-book book-b pattern-2"></div>
+        <div class="journal-book book-c pattern-10"></div>
+        <div class="journal-book book-d pattern-17"></div>
+        <div class="journal-book book-e pattern-15"></div>
+        <div class="journal-book book-f pattern-21"></div>
+
+        <div class="journal-copy">
+          <h2>Curiosity Journal</h2>
+          <p class="journal-subtitle">Introduction to Child &amp; Adolescent Development</p>
+          <div class="actions">
+            <a class="pill primary" href="https://johnparrott.github.io/CAS101Journal/" target="_blank" rel="noopener">Go to Journal</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="card-footer-icon" aria-hidden="true"></span>
+        <span>Sun &nbsp;|&nbsp; Nov 8 &nbsp;|&nbsp; by Midnight</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Description</h2>
+      <div class="body-copy">
+        <p>The Curiosity Journal is a space for you to explore questions that arise as you learn about child and adolescent development. After reading or listening to <strong>Chapter 12</strong>, you will identify something that made you curious, turn that curiosity into a focused question, investigate the question using credible sources, and develop an initial answer based on what you discover.</p>
+
+        <p>Your question does not need to have one simple or final answer. The goal is to move beyond recalling information from the chapter and begin thinking like a developmentalist: asking meaningful questions, examining evidence, and using what you find to build a thoughtful explanation.</p>
+
+        <p>For this entry, your question should connect to one or more ideas from <strong>Chapter 12</strong>, such as the principles of development, periods of child and adolescent development, major issues in development, developmental research methods, theories of child development, or the different contexts that shape development.</p>
+      </div>
+    </section>
+
+    <div class="page-divider"></div>
+
+    <section class="section" aria-labelledby="how-to-title">
+      <h2 class="section-title" id="how-to-title">How to Complete a Journal Entry</h2>
+
+      <div class="demo-carousel" aria-roledescription="carousel">
+        <div class="demo-viewport" aria-live="polite">
+          
+        <article class="demo-slide is-active" data-slide="0">
+          <div class="demo-video-frame">
+            <video autoplay muted playsinline preload="auto" data-trim-start="2.0" data-trim-end="4.0">
+              <source src="https://www.dropbox.com/scl/fi/ffkc07met0lmopmgzbbll/CAS-101-Journal-Demos-1.mp4?rlkey=su346o0kwhw3req8bxtm7a6kw&st=nhqeqhzy&raw=1" type="video/mp4">
+            </video>
+              <div class="video-fallback">
+                <p>This video could not load here. <a href="#" target="_blank" rel="noopener">Open the video</a></p>
+              </div>
+          </div>
+          <p class="demo-caption"><strong>1. Ask one focused question</strong> inspired by the chapter.</p>
+        </article>
+    
+
+        <article class="demo-slide" data-slide="1">
+          <div class="demo-video-frame">
+            <video autoplay muted playsinline preload="auto" data-trim-start="2.0" data-trim-end="5.0">
+              <source src="https://www.dropbox.com/scl/fi/mj27jefxecz5w7usjtbgj/CAS-101-Journal-Demos-2.mp4?rlkey=qat7d8obeuz573al50b50gwqv&st=ay6xinyu&raw=1" type="video/mp4">
+            </video>
+              <div class="video-fallback">
+                <p>This video could not load here. <a href="#" target="_blank" rel="noopener">Open the video</a></p>
+              </div>
+          </div>
+          <p class="demo-caption"><strong>2. Add at least two credible sources</strong> that help you investigate your question.</p>
+        </article>
+    
+
+        <article class="demo-slide" data-slide="2">
+          <div class="demo-video-frame">
+            <video autoplay muted playsinline preload="auto" data-trim-start="2.0" data-trim-end="5.0">
+              <source src="https://www.dropbox.com/scl/fi/gc4hv90fkh8jqcqwor93m/CAS-101-Journal-Demos.mp4?rlkey=v6u461e26ymth6zl2xy7kxszi&st=dlmitedu&raw=1" type="video/mp4">
+            </video>
+              <div class="video-fallback">
+                <p>This video could not load here. <a href="#" target="_blank" rel="noopener">Open the video</a></p>
+              </div>
+          </div>
+          <p class="demo-caption"><strong>3. Write an initial answer</strong> that brings together ideas from the chapter and your sources. Then download and submit to this assignment on Canvas.</p>
+        </article>
+    
+        </div>
+
+        <div class="carousel-controls">
+          <button class="carousel-arrow prev" id="previousSlide" type="button" aria-label="Previous step"></button>
+          <button class="carousel-arrow next" id="nextSlide" type="button" aria-label="Next step"></button>
+        </div>
+      </div>
+    </section>
+
+    <div class="page-divider"></div>
+
+    <section class="section" aria-labelledby="rubric-title">
+      <h2 class="section-title" id="rubric-title">Rubric</h2>
+
+      <div class="rubric-grid">
+        <article class="rubric-column gold">
+          <div class="medal" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <path d="M32 72l15 5-7 20-8-8-10 3 8-22z" fill="#ff4d47" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+              <path d="M68 72l-15 5 7 20 8-8 10 3-8-22z" fill="#e62f2a" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+              <circle cx="50" cy="53" r="28" fill="#f5c94f" stroke="#111" stroke-width="4"/>
+              <path d="M50 35l5.4 10.9 12 1.7-8.7 8.5 2.1 12-10.8-5.7-10.8 5.7 2.1-12-8.7-8.5 12-1.7z" fill="#fff8d9"/>
+            </svg>
+          </div>
+          <h3>Gold</h3>
+          <p class="rubric-score">Excellent</p>
+          <ul class="rubric-list">
+            <li><strong>Curiosity Question</strong><br>The question is clear, focused, genuinely investigable, and meaningfully connected to Chapter 12.<br><span class="criterion-points">4 points</span></li>
+            <li><strong>Source Selection</strong><br>Both sources are credible, relevant, and well chosen for investigating the question. Together, they contribute useful evidence or perspectives.<br><span class="criterion-points">4 points</span></li>
+            <li><strong>Explanation of Sources</strong><br>Clearly and accurately explains the important information, evidence, or perspective contributed by each source.<br><span class="criterion-points">4 points</span></li>
+            <li><strong>Initial Answer and Synthesis</strong><br>Directly answers the question and thoughtfully brings together ideas from the chapter and both sources. The reasoning is clear and supported by evidence.<br><span class="criterion-points">6 points</span></li>
+            <li><strong>Clarity and Communication</strong><br>The entry is organized, understandable, and written primarily in the student’s own words. Sources and ideas are represented accurately.<br><span class="criterion-points">2 points</span></li>
+          </ul>
+        </article>
+
+        <article class="rubric-column silver">
+          <div class="medal" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <path d="M32 72l15 5-7 20-8-8-10 3 8-22z" fill="#ff4d47" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+              <path d="M68 72l-15 5 7 20 8-8 10 3-8-22z" fill="#e62f2a" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+              <circle cx="50" cy="53" r="28" fill="#cfd7de" stroke="#111" stroke-width="4"/>
+              <path d="M50 35l5.4 10.9 12 1.7-8.7 8.5 2.1 12-10.8-5.7-10.8 5.7 2.1-12-8.7-8.5 12-1.7z" fill="#f7f9fa"/>
+            </svg>
+          </div>
+          <h3>Silver</h3>
+          <p class="rubric-score">Developing</p>
+          <ul class="rubric-list">
+            <li><strong>Curiosity Question</strong><br>The question connects to the chapter but may be broad, unclear, or answerable with a simple fact.<br><span class="criterion-points">3 points</span></li>
+            <li><strong>Source Selection</strong><br>The sources are generally relevant, but one may have limited credibility, depth, or usefulness.<br><span class="criterion-points">3 points</span></li>
+            <li><strong>Explanation of Sources</strong><br>Explains what the sources say, but the discussion may be brief, general, or mostly summary.<br><span class="criterion-points">3 points</span></li>
+            <li><strong>Initial Answer and Synthesis</strong><br>Provides an answer and uses evidence, but the ideas may remain somewhat separate, underdeveloped, or only partially connected to the question.<br><span class="criterion-points">5 points</span></li>
+            <li><strong>Clarity and Communication</strong><br>The main ideas are understandable, but parts of the entry may be unclear, repetitive, or too dependent on source wording.<br><span class="criterion-points">1 point</span></li>
+          </ul>
+        </article>
+
+        <article class="rubric-column bronze">
+          <div class="medal" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <path d="M32 72l15 5-7 20-8-8-10 3 8-22z" fill="#ff4d47" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+              <path d="M68 72l-15 5 7 20 8-8 10 3-8-22z" fill="#e62f2a" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+              <circle cx="50" cy="53" r="28" fill="#e7a064" stroke="#111" stroke-width="4"/>
+              <path d="M50 35l5.4 10.9 12 1.7-8.7 8.5 2.1 12-10.8-5.7-10.8 5.7 2.1-12-8.7-8.5 12-1.7z" fill="#fff6e8"/>
+            </svg>
+          </div>
+          <h3>Bronze</h3>
+          <p class="rubric-score">Needs Improvement</p>
+          <ul class="rubric-list">
+            <li><strong>Curiosity Question</strong><br>The question has a limited connection to Chapter 12 or does not provide a useful direction for investigation.<br><span class="criterion-points">2 points</span></li>
+            <li><strong>Source Selection</strong><br>The sources have limited relevance, credibility, or value for answering the question.<br><span class="criterion-points">2 points</span></li>
+            <li><strong>Explanation of Sources</strong><br>Provides limited or unclear explanation of how the sources contribute to the investigation.<br><span class="criterion-points">2 points</span></li>
+            <li><strong>Initial Answer and Synthesis</strong><br>Provides a limited answer, relies heavily on unsupported opinion, or makes little use of the chapter and sources together.<br><span class="criterion-points">3 points</span></li>
+            <li><strong>Clarity and Communication</strong><br>The writing is difficult to follow or does not clearly communicate the student’s reasoning.<br><span class="criterion-points">1 point</span></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function() {
+      const slides = Array.from(document.querySelectorAll('.demo-slide'));
+      const previous = document.getElementById('previousSlide');
+      const next = document.getElementById('nextSlide');
+      let index = 0;
+
+      function trimStart(video) {
+        return Number(video.dataset.trimStart || 0);
+      }
+
+      function trimEndTime(video) {
+        const endTrim = Number(video.dataset.trimEnd || 0);
+        return Math.max(trimStart(video) + 0.1, video.duration - endTrim);
+      }
+
+      function startTrimmedPlayback(video) {
+        if (!Number.isFinite(video.duration)) return;
+
+        const start = trimStart(video);
+        if (video.currentTime < start || video.currentTime >= trimEndTime(video)) {
+          video.currentTime = start;
+        }
+
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {});
+        }
+      }
+
+      slides.forEach(slide => {
+        const video = slide.querySelector('video');
+        const fallback = slide.querySelector('.video-fallback');
+        const fallbackLink = fallback?.querySelector('a');
+        const source = video?.querySelector('source');
+
+        if (fallbackLink && source) {
+          fallbackLink.href = source.src;
+        }
+
+        if (!video) return;
+
+        video.addEventListener('loadedmetadata', () => {
+          video.currentTime = trimStart(video);
+        });
+
+        video.addEventListener('loadeddata', () => {
+          video.style.display = 'block';
+          if (fallback) fallback.style.display = 'none';
+
+          if (slide.classList.contains('is-active')) {
+            startTrimmedPlayback(video);
+          }
+        });
+
+        video.addEventListener('timeupdate', () => {
+          if (!Number.isFinite(video.duration)) return;
+
+          if (video.currentTime >= trimEndTime(video)) {
+            video.currentTime = trimStart(video);
+            const playPromise = video.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => {});
+            }
+          }
+        });
+
+        video.addEventListener('error', () => {
+          video.style.display = 'none';
+          if (fallback) fallback.style.display = 'grid';
+        });
+      });
+
+      function render() {
+        slides.forEach((slide, slideIndex) => {
+          const active = slideIndex === index;
+          slide.classList.toggle('is-active', active);
+          slide.setAttribute('aria-hidden', String(!active));
+
+          const video = slide.querySelector('video');
+          if (!video) return;
+
+          if (active) {
+            if (video.readyState >= 1) {
+              video.currentTime = trimStart(video);
+              startTrimmedPlayback(video);
+            }
+          } else {
+            video.pause();
+          }
+        });
+
+        previous.disabled = index === 0;
+        next.disabled = index === slides.length - 1;
+      }
+
+      previous.addEventListener('click', () => {
+        if (index <= 0) return;
+        index -= 1;
+        render();
+      });
+
+      next.addEventListener('click', () => {
+        if (index >= slides.length - 1) return;
+        index += 1;
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
